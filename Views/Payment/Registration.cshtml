@@ -1,0 +1,50 @@
+﻿@model RegistrationModel
+@{
+    ViewData["Title"] = "Registration";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Registration</h1>
+
+<div>
+    <form asp-action="Payment">
+        <div class="row">
+            <div class="offset-1 col-2">
+                <strong>Name</strong>
+            </div>
+            <div class="col-4">
+                <input type="text" asp-for="Name" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-1 col-2">
+                <strong>Mobile</strong>
+            </div>
+            <div class="col-4">
+                <input type="text" asp-for="Mobile" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-1 col-2">
+                <strong>Email</strong>
+            </div>
+            <div class="col-4">
+                <input type="text" asp-for="Email" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="offset-1 col-2">
+                <strong>Amount</strong>
+            </div>
+            <div class="col-4">
+                ₹ @Model.Amount.ToString("0.00")
+                <input type="hidden" asp-for="Amount" value="@Model.Amount" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12 text-right">
+                <button type="submit" class="btn btn-outline-primary">Register</button>
+            </div>
+        </div>
+    </form>
+</div>

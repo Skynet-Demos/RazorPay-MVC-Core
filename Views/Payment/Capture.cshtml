@@ -1,0 +1,23 @@
+﻿
+@{
+    ViewData["Title"] = "Capture";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Capture</h1>
+
+<div>
+    <form asp-action="CapturePayment">
+        <div class="row">
+            <div class="col-md-2">
+                Payment Id
+            </div>
+            <div class="col-md-4">
+                <input type="text" name="paymentid" class="form-control" />
+            </div>
+            <div class="col-md-2">
+                <input type="submit" class="btn-primary" value="Capture" />
+            </div>
+        </div>
+    </form>
+</div>
