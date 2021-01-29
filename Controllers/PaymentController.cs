@@ -13,11 +13,11 @@ namespace WebApplication2.Controllers
     public class PaymentController : Controller
     {
         private const string _key = "YOUR_KEY";
-        private const string _secret = "YOUR_SECRET";
+        private const string _secret = "YOUR_SECRET";        
 
         public ViewResult Registration()
         {
-            var model = new RegistrationModel() { Amount = 500 };
+            var model = new RegistrationModel() { Amount = 2 };
             return View(model);
         }
 
@@ -30,10 +30,12 @@ namespace WebApplication2.Controllers
                 Payment_Capture = 1,    // 0 - Manual capture, 1 - Auto capture
                 Notes = new Dictionary<string, string>()
                 {
-                    { "note 1", "first note while creating order" }, { "note 2", "you can add max 15 notes" }
+                    { "note 1", "first note while creating order" }, { "note 2", "you can add max 15 notes" },
+                    { "note for account 1", "this is a linked note for account 1" }, { "note 2 for second transfer", "it's another note for 2nd account" }
                 }
             };
-            var orderId = CreateOrder(order);
+            // var orderId = CreateOrder(order);
+            var orderId = CreateTransfersViaOrder(order);
 
             RazorPayOptionsModel razorPayOptions = new RazorPayOptionsModel()
             {
@@ -65,6 +67,54 @@ namespace WebApplication2.Controllers
                 options.Add("currency", order.Currency);
                 options.Add("payment_capture", order.Payment_Capture);
                 options.Add("notes", order.Notes);
+
+                Order orderResponse = client.Order.Create(options);
+                var orderId = orderResponse.Attributes["id"].ToString();
+                return orderId;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private string CreateTransfersViaOrder(OrderModel order)
+        {
+            try
+            {
+                RazorpayClient client = new RazorpayClient(_key, _secret);
+                Dictionary<string, object> options = new Dictionary<string, object>();
+                options.Add("amount", order.OrderAmountInSubUnits);
+                options.Add("currency", order.Currency);
+                options.Add("payment_capture", order.Payment_Capture);
+                options.Add("notes", order.Notes);
+
+                List<Dictionary<string, object>> transfers = new List<Dictionary<string, object>>();
+
+                // Tranfer to Account 1
+                Dictionary<string, object> transfer = new Dictionary<string, object>();
+                transfer.Add("account", "acc_FrZdKIHffMifPl");              // account 1
+                transfer.Add("amount", order.OrderAmountInSubUnits / 2);    // 50% amount of the total amount
+                transfer.Add("currency", "INR");
+                transfer.Add("notes", order.Notes);
+                List<string> linkedAccountNotes = new List<string>();
+                linkedAccountNotes.Add("note for account 1");
+                transfer.Add("linked_account_notes", linkedAccountNotes);
+                transfers.Add(transfer);
+
+                // Transfer to Account 2
+                transfer = new Dictionary<string, object>();
+                transfer.Add("account", "acc_FrZbSTT96Jfp6n");              // account 2
+                transfer.Add("amount", order.OrderAmountInSubUnits / 2);    // 50% amount of the total amount
+                transfer.Add("currency", "INR");
+                transfer.Add("notes", order.Notes);
+                linkedAccountNotes = new List<string>();
+                linkedAccountNotes.Add("note 2 for second transfer");
+                transfer.Add("linked_account_notes", linkedAccountNotes);
+                transfers.Add(transfer);
+
+                // Add transfers to options object
+                options.Add("transfers", transfers);
 
                 Order orderResponse = client.Order.Create(options);
                 var orderId = orderResponse.Attributes["id"].ToString();
